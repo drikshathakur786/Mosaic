@@ -53,6 +53,22 @@ public class GlobalExceptionHandler {
                 ex.getMessage(), request);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex,
+                                                             HttpServletRequest request) {
+        log.warn("Unauthorized access: {}", ex.getMessage());
+        return buildResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED",
+                ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex,
+                                                          HttpServletRequest request) {
+        log.warn("Forbidden access: {}", ex.getMessage());
+        return buildResponse(HttpStatus.FORBIDDEN, "FORBIDDEN",
+                ex.getMessage(), request);
+    }
+
     // =========================================================================
     // Validation Errors
     // =========================================================================
