@@ -1,0 +1,101 @@
+# =============================================================================
+# Mosaic Backend — Application Configuration
+# =============================================================================
+# This file contains default configuration shared across all profiles.
+# Profile-specific overrides go in application-{profile}.yml
+# =============================================================================
+
+spring:
+  application:
+    name: mosaic-backend
+
+  # -------------------------------------------------------------------------
+  # JPA / Hibernate
+  # -------------------------------------------------------------------------
+  jpa:
+    open-in-view: false                          # Prevent lazy-loading in controllers
+    hibernate:
+      ddl-auto: validate                          # Flyway manages schema, Hibernate only validates
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          time_zone: UTC                          # Store all timestamps in UTC
+
+  # -------------------------------------------------------------------------
+  # Flyway — Database Migrations
+  # -------------------------------------------------------------------------
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+
+  # -------------------------------------------------------------------------
+  # Jackson — JSON Serialization
+  # -------------------------------------------------------------------------
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false            # ISO 8601 date strings
+      indent-output: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null           # Skip null fields in responses
+    time-zone: UTC
+
+  # -------------------------------------------------------------------------
+  # File Upload Limits
+  # -------------------------------------------------------------------------
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# =============================================================================
+# Server Configuration
+# =============================================================================
+server:
+  port: 8080
+  error:
+    include-message: never                        # Don't leak internal messages
+    include-binding-errors: never
+    include-stacktrace: never
+
+# =============================================================================
+# Actuator — Health & Metrics
+# =============================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+# =============================================================================
+# OpenAPI / Swagger
+# =============================================================================
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+# =============================================================================
+# Application-Specific Properties
+# =============================================================================
+mosaic:
+  version: 0.1.0
+  jwt:
+    secret: ${JWT_SECRET:}
+    access-token-expiry-ms: 900000               # 15 minutes
+    refresh-token-expiry-ms: 604800000            # 7 days
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:3000}

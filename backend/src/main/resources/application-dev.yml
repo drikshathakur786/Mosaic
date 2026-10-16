@@ -1,0 +1,39 @@
+# =============================================================================
+# Mosaic Backend — Development Profile
+# =============================================================================
+# Activated via: --spring.profiles.active=dev
+# Or environment variable: SPRING_PROFILES_ACTIVE=dev
+# =============================================================================
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:mosaic}
+    username: ${POSTGRES_USER:mosaic}
+    password: ${POSTGRES_PASSWORD:mosaic_dev_password}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+
+  jpa:
+    show-sql: true                                # Log SQL in development
+
+  flyway:
+    clean-disabled: false                         # Allow flyway:clean in dev only
+
+# =============================================================================
+# Logging — Verbose in development
+# =============================================================================
+logging:
+  level:
+    root: INFO
+    com.mosaic: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.flywaydb: INFO
+
+# =============================================================================
+# Swagger — Enabled in development
+# =============================================================================
+springdoc:
+  swagger-ui:
+    enabled: true

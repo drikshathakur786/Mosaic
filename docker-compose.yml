@@ -1,0 +1,57 @@
+services:
+  # =============================================================================
+  # PostgreSQL Database Service
+  # =============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: mosaic-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mosaic}
+      POSTGRES_USER: ${POSTGRES_USER:-mosaic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mosaic_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mosaic} -d ${POSTGRES_DB:-mosaic}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mosaic-network
+
+  # =============================================================================
+  # Mosaic Backend API (Spring Boot 3.3 / Java 21)
+  # =============================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mosaic-backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-mosaic}
+      POSTGRES_USER: ${POSTGRES_USER:-mosaic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mosaic_dev_password}
+      JWT_SECRET: ${JWT_SECRET:-dev-super-secret-key-that-is-at-least-256-bits-long-for-hmac-sha256}
+      CORS_ORIGINS: "http://localhost:5173,http://localhost:3000"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mosaic-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  mosaic-network:
+    driver: bridge
